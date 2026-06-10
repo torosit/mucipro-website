@@ -8,7 +8,11 @@ export default function About() {
   ];
 
   return (
-    <section id="about" className="py-24 bg-background" data-testid="section-about">
+    <section
+      id="about"
+      className="py-24 bg-background"
+      data-testid="section-about"
+    >
       <div className="container mx-auto px-4 md:px-6">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <motion.div
@@ -17,18 +21,30 @@ export default function About() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">Acerca de Nosotros</h2>
-            <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
-              En Mucipro SAS estamos comprometidos con la sostenibilidad y la innovación. Nuestro objetivo es aprovechar el mucílago de café, un subproducto tradicionalmente descartado, y transformarlo en aditivos de alto valor para la industria alimentaria.
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
+              Acerca de Nosotros
+            </h2>
+            <p className="text-gray-600 text-lg mb-6 leading-relaxed">
+              En Mucipro SAS transformamos el mucilado de café en aditivos
+              innovadores. Nuestros productos mejoran la calidad nutricional y
+              la textura en alimentos, reduciendo costos de producción y
+              aprovechando residuos sosteniblemente.
             </p>
             <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-              Con tecnología de punta y rigurosos estándares de calidad, ofrecemos soluciones precisas que mejoran la nutrición, textura y sabor de los alimentos, todo mientras reducimos el impacto ambiental de la producción cafetera.
+              Con tecnología de punta y rigurosos estándares de calidad,
+              ofrecemos soluciones precisas que mejoran la nutrición, textura y
+              sabor de los alimentos, todo mientras reducimos el impacto
+              ambiental de la producción cafetera.
             </p>
             <div className="grid grid-cols-3 gap-6 pt-6 border-t border-border">
               {stats.map((stat, i) => (
                 <div key={i} className="text-center">
-                  <div className="text-3xl font-bold text-primary mb-1">{stat.value}</div>
-                  <div className="text-sm font-medium text-muted-foreground">{stat.label}</div>
+                  <div className="text-3xl font-bold text-primary mb-1">
+                    {stat.value}
+                  </div>
+                  <div className="text-sm font-medium text-muted-foreground">
+                    {stat.label}
+                  </div>
                 </div>
               ))}
             </div>

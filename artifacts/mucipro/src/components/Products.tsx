@@ -6,29 +6,14 @@ import { Button } from "@/components/ui/button";
 export default function Products() {
   const products = [
     {
-      title: "Aditivo Proteínico",
-      description: "Enriquecedor de alimentos con proteína de alta digestibilidad extraída del mucílago.",
-      icon: Zap,
+      id: 1,
+      name: 'Enzimas Mucipro - Bolsa 5kg',
+      description: 'Enzimas concentradas del mucilado de café. Presentación de 5kg ideal para pequeñas y medianas producciones alimentarias.',
     },
     {
-      title: "Aditivo Fibra",
-      description: "Fibra dietaria soluble para mejorar el tránsito intestinal y la salud digestiva.",
-      icon: Leaf,
-    },
-    {
-      title: "Aditivo Antioxidante",
-      description: "Concentrado rico en polifenoles para preservación natural y beneficios a la salud.",
-      icon: Shield,
-    },
-    {
-      title: "Aditivo Sabor",
-      description: "Potenciador natural de sabor con notas dulces y afrutadas características del café.",
-      icon: Sparkles,
-    },
-    {
-      title: "Aditivo Espesante",
-      description: "Agente texturizante natural para bebidas, salsas y postres, sin alterar el color.",
-      icon: Droplets,
+      id: 2,
+      name: 'Enzimas Mucipro - Bolsa 20kg',
+      description: 'Enzimas concentradas del mucilado de café. Presentación de 20kg para grandes volúmenes de producción industrial.',
     },
   ];
 
