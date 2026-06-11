@@ -10,9 +10,12 @@ import ChatBot from "@/components/ChatBot";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen flex-col bg-background" data-testid="page-home">
+    <div
+      className="flex min-h-screen flex-col bg-background"
+      data-testid="page-home"
+    >
       <Header />
-      <main className="flex-1">
+      <main className="flex-1 pt-20">
         <Hero />
         <About />
         <Products />

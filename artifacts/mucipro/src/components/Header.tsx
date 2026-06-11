@@ -1,16 +1,11 @@
-import { useState, useEffect } from "react";
-import { Menu, X, Sprout } from "lucide-react";
-import { Button } from "@/components/ui/button";
+"use client";
+
+import { useState } from "react";
+import { Menu, X } from "lucide-react";
+
 
 export default function Header() {
-  const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   const navLinks = [
     { name: "Inicio", href: "#hero" },
@@ -20,76 +15,78 @@ export default function Header() {
     { name: "Testimonios", href: "#testimonials" },
   ];
 
+  const handleAgendar = () => {
+    const chatButton = document.querySelector(
+      '[title="Abrir chatbot"]',
+    ) as HTMLButtonElement;
+    if (chatButton) {
+      chatButton.click();
+    }
+  };
+
   return (
-    <header
-      className={`fixed top-0 z-50 w-full transition-all duration-300 ${
-        isScrolled ? "bg-background/95 backdrop-blur shadow-sm" : "bg-transparent text-white"
-      }`}
-      data-testid="header-nav"
-    >
+    <header className="fixed top-0 z-50 w-full bg-white shadow-sm">
       <div className="container mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
-        <a href="#hero" className="flex items-center gap-2" data-testid="link-logo">
-          <Sprout className={`h-8 w-8 ${isScrolled ? "text-primary" : "text-white"}`} />
-          <span className={`text-xl font-bold tracking-tight ${isScrolled ? "text-foreground" : "text-white"}`}>
-            Mucipro SAS
-          </span>
+        <a href="#hero">
+          <img
+            src="/images/Muciprolog.jpeg"
+            alt="Mucipro Logo"
+            className="h-14"
+          />
         </a>
 
-        {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center gap-6">
+        <nav className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => (
             <a
               key={link.name}
               href={link.href}
-              className={`text-sm font-medium hover:text-primary transition-colors ${
-                isScrolled ? "text-muted-foreground" : "text-white/90"
-              }`}
-              data-testid={`link-${link.name.toLowerCase()}`}
+              className="text-sm font-medium text-gray-700 hover:text-green-600 transition-colors"
             >
               {link.name}
             </a>
           ))}
-          <Button
-            asChild
-            variant={isScrolled ? "default" : "secondary"}
-            className={!isScrolled ? "bg-white text-primary hover:bg-white/90" : ""}
+          <button
+            onClick={handleAgendar}
+            className="bg-green-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors"
           >
-            <a href="#contact" data-testid="button-contact">Agendar Consulta</a>
-          </Button>
+            Agendar Consulta
+          </button>
         </nav>
 
-        {/* Mobile Menu Toggle */}
         <button
           className="md:hidden p-2"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          data-testid="button-mobile-menu"
         >
           {mobileMenuOpen ? (
-            <X className={`h-6 w-6 ${isScrolled ? "text-foreground" : "text-white"}`} />
+            <X className="h-6 w-6" />
           ) : (
-            <Menu className={`h-6 w-6 ${isScrolled ? "text-foreground" : "text-white"}`} />
+            <Menu className="h-6 w-6" />
           )}
         </button>
       </div>
 
-      {/* Mobile Nav */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-background border-b border-border px-4 py-4 space-y-4">
+        <div className="md:hidden bg-white border-t border-gray-200 px-4 py-4">
           <nav className="flex flex-col gap-4">
             {navLinks.map((link) => (
               <a
                 key={link.name}
                 href={link.href}
-                className="text-sm font-medium text-foreground hover:text-primary"
+                className="text-sm font-medium text-gray-700 hover:text-green-600"
                 onClick={() => setMobileMenuOpen(false)}
-                data-testid={`link-mobile-${link.name.toLowerCase()}`}
               >
                 {link.name}
               </a>
             ))}
-            <Button asChild className="w-full">
-              <a href="#contact" onClick={() => setMobileMenuOpen(false)}>Agendar Consulta</a>
-            </Button>
+            <button
+              onClick={() => {
+                handleAgendar();
+                setMobileMenuOpen(false);
+              }}
+              className="block w-full bg-green-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-green-700 text-center"
+            >
+              Agendar Consulta
+            </button>
           </nav>
         </div>
       )}

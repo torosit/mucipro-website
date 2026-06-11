@@ -1,131 +1,266 @@
-import { useState, useRef, useEffect } from "react";
-import { MessageSquare, X, Send } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
-import { motion, AnimatePresence } from "framer-motion";
+"use client";
+
+import { useState } from "react";
+import { MessageCircle, X, Send } from "lucide-react";
 
 export default function ChatBot() {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([
-    { id: 1, text: "¡Hola! Soy el asistente virtual de Mucipro. ¿En qué te puedo ayudar hoy?", sender: "bot", timestamp: new Date() }
-  ]);
-  const [inputValue, setInputValue] = useState("");
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [step, setStep] = useState("initial"); // initial, form, confirmation
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    date: "",
+    time: "",
+    message: "",
+  });
 
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [messages, isOpen]);
-
-  const handleSend = () => {
-    if (!inputValue.trim()) return;
-
-    const userMsg = { id: Date.now(), text: inputValue, sender: "user", timestamp: new Date() };
-    setMessages(prev => [...prev, userMsg]);
-    setInputValue("");
-
-    setTimeout(() => {
-      setMessages(prev => [...prev, {
-        id: Date.now(),
-        text: "Gracias por tu mensaje. Un asesor comercial se pondrá en contacto pronto. ¿Deseas agendar una consulta?",
-        sender: "bot",
-        timestamp: new Date()
-      }]);
-    }, 1000);
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleQuickAction = (action: string) => {
-    setInputValue(action);
-    handleSend();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Validar campos
+    if (
+      !formData.name ||
+      !formData.email ||
+      !formData.phone ||
+      !formData.date ||
+      !formData.time
+    ) {
+      alert("Por favor completa todos los campos");
+      return;
+    }
+
+    // Enviar email usando FormSubmit (gratuito)
+    try {
+      const response = await fetch("https://formspree.io/f/xyzqwert", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          date: formData.date,
+          time: formData.time,
+          message: formData.message,
+        }),
+      });
+
+      if (response.ok) {
+        setStep("confirmation");
+        setTimeout(() => {
+          setIsOpen(false);
+          setStep("initial");
+          setFormData({
+            name: "",
+            email: "",
+            phone: "",
+            date: "",
+            time: "",
+            message: "",
+          });
+        }, 3000);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Hubo un error. Intenta de nuevo.");
+    }
   };
 
   return (
     <>
-      <AnimatePresence>
-        {!isOpen && (
-          <motion.div
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            className="fixed bottom-6 right-6 z-50"
-          >
-            <Button
-              size="icon"
-              className="h-14 w-14 rounded-full shadow-lg bg-primary text-primary-foreground hover:bg-primary/90"
-              onClick={() => setIsOpen(true)}
-              data-testid="button-open-chat"
+      {/* Botón flotante */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="fixed bottom-6 right-6 w-16 h-16 bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center justify-center text-2xl shadow-lg hover:shadow-xl transition-all z-40"
+        title="Abrir chatbot"
+      >
+        💬
+      </button>
+
+      {/* Ventana del chat */}
+      {isOpen && (
+        <div className="fixed bottom-24 right-6 w-96 h-96 bg-white rounded-lg shadow-2xl flex flex-col z-40 border border-gray-200">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-green-600 to-green-700 text-white p-4 rounded-t-lg flex justify-between items-center">
+            <div>
+              <h3 className="font-bold">Mucipro SAS</h3>
+              <p className="text-xs opacity-80">Agendar Consulta</p>
+            </div>
+            <button
+              onClick={() => setIsOpen(false)}
+              className="text-xl hover:opacity-75"
             >
-              <MessageSquare className="h-6 w-6" />
-            </Button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              ✕
+            </button>
+          </div>
 
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-6 right-6 z-50 w-[350px]"
-          >
-            <Card className="flex flex-col h-[500px] shadow-xl border-border">
-              {/* Header */}
-              <div className="p-4 bg-primary text-primary-foreground flex justify-between items-center rounded-t-xl">
-                <div className="font-semibold">Asistente Mucipro</div>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-primary-foreground hover:bg-primary/20" onClick={() => setIsOpen(false)}>
-                  <X className="h-5 w-5" />
-                </Button>
-              </div>
+          {/* Content */}
+          <div className="flex-1 overflow-y-auto p-4 flex flex-col justify-between">
+            {step === "initial" && (
+              <div className="space-y-4">
+                <div className="bg-green-50 p-3 rounded-lg border border-green-200">
+                  <p className="text-sm text-gray-700">
+                    👋 ¡Hola! Bienvenido a Mucipro SAS
+                  </p>
+                  <p className="text-xs text-gray-600 mt-2">
+                    Estamos disponibles de{" "}
+                    <strong>lunes a viernes, 8am-5pm</strong>
+                  </p>
+                </div>
 
-              {/* Messages */}
-              <div className="flex-1 p-4 overflow-y-auto bg-muted/20 space-y-4">
-                {messages.map((msg) => (
-                  <div key={msg.id} className={`flex flex-col ${msg.sender === "user" ? "items-end" : "items-start"}`}>
-                    <div className={`max-w-[80%] rounded-2xl px-4 py-2 text-sm ${
-                      msg.sender === "user" 
-                        ? "bg-primary text-primary-foreground rounded-tr-none" 
-                        : "bg-white border border-border text-foreground rounded-tl-none"
-                    }`}>
-                      {msg.text}
-                    </div>
-                    <span className="text-[10px] text-muted-foreground mt-1 px-1">
-                      {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                  </div>
-                ))}
-                <div ref={messagesEndRef} />
-              </div>
+                <div className="text-sm text-gray-600">
+                  <p className="mb-3">¿Necesitas agendar una consulta? 📅</p>
+                </div>
 
-              {/* Quick Actions */}
-              <div className="px-4 py-2 flex gap-2 overflow-x-auto no-scrollbar bg-background border-t border-border">
-                <Button variant="outline" size="sm" className="text-xs shrink-0 rounded-full" onClick={() => handleQuickAction("Agendar Consulta")}>
+                <button
+                  onClick={() => setStep("form")}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg font-semibold transition-colors"
+                >
                   Agendar Consulta
-                </Button>
-                <Button variant="outline" size="sm" className="text-xs shrink-0 rounded-full" onClick={() => handleQuickAction("Preguntas Frecuentes")}>
-                  Preguntas Frecuentes
-                </Button>
-              </div>
+                </button>
 
-              {/* Input */}
-              <div className="p-4 bg-background border-t border-border flex gap-2 rounded-b-xl">
-                <Input
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                  placeholder="Escribe tu mensaje..."
-                  className="flex-1"
-                />
-                <Button size="icon" onClick={handleSend} disabled={!inputValue.trim()}>
-                  <Send className="h-4 w-4" />
-                </Button>
+                <div className="border-t pt-3 text-xs text-gray-600 space-y-2">
+                  <p>
+                    📞 <strong>+57 320 223 9297</strong>
+                  </p>
+                  <p>
+                    📧 <strong>muciprocolombia@gmail.com</strong>
+                  </p>
+                </div>
               </div>
-            </Card>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            )}
+
+            {step === "form" && (
+              <form onSubmit={handleSubmit} className="space-y-3">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Nombre *
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    placeholder="Tu nombre"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-600"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Email *
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    placeholder="tu@email.com"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-600"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Teléfono *
+                  </label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    placeholder="+57 300 000 0000"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-600"
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      Fecha *
+                    </label>
+                    <input
+                      type="date"
+                      name="date"
+                      value={formData.date}
+                      onChange={handleInputChange}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-600"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      Hora *
+                    </label>
+                    <input
+                      type="time"
+                      name="time"
+                      value={formData.time}
+                      onChange={handleInputChange}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-600"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Mensaje (opcional)
+                  </label>
+                  <textarea
+                    name="message"
+                    value={formData.message}
+                    onChange={handleInputChange}
+                    placeholder="Cuéntanos sobre tu consulta..."
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-600"
+                    rows={2}
+                  />
+                </div>
+
+                <div className="flex gap-2 pt-2">
+                  <button
+                    type="submit"
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg font-semibold transition-colors"
+                  >
+                    Enviar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setStep("initial")}
+                    className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-lg font-semibold transition-colors"
+                  >
+                    Atrás
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {step === "confirmation" && (
+              <div className="space-y-4 flex flex-col items-center justify-center h-full">
+                <div className="text-5xl">✅</div>
+                <div className="text-center">
+                  <p className="font-bold text-gray-800">¡Gracias!</p>
+                  <p className="text-sm text-gray-600 mt-2">
+                    Tu agendamiento fue enviado. Te contactaremos pronto.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </>
   );
 }
